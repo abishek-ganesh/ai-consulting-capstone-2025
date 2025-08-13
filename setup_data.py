@@ -63,36 +63,57 @@ def check_images():
     ecom_path = Path('ecommerce/product_images')
     health_path = Path('healthcare/retinal_scan_images')
     
-    # Count images
-    ecom_images = list(ecom_path.glob('*.jpg'))
-    health_images = list(health_path.glob('*.png'))
+    # Detect which project this team is working on
+    ecom_exists = Path('ecommerce').exists()
+    health_exists = Path('healthcare').exists()
     
-    ecom_count = len(ecom_images)
-    health_count = len(health_images)
+    if ecom_exists and not health_exists:
+        print("\n  📊 Project: E-COMMERCE (StyleVision)")
+        ecom_images = list(ecom_path.glob('*.jpg')) if ecom_path.exists() else []
+        ecom_count = len(ecom_images)
+        
+        if ecom_count == 0:
+            print(f"    ❌ No product images found!")
+            print(f"       → Download product_images.zip from Slack #capstone-data")
+            print(f"       → Extract to ecommerce/product_images/")
+            return False
+        elif ecom_count < 12000:
+            print(f"    ⚠️  {ecom_count:,} images (expected ~12,114)")
+            print(f"       → You might have a partial download")
+            return False
+        else:
+            print(f"    ✅ {ecom_count:,} product images ready!")
+            return True
     
-    print(f"\n  E-COMMERCE IMAGES:")
-    if ecom_count == 0:
-        print(f"    ❌ No images found!")
-        print(f"       → Download product_images.zip from Slack #capstone-data")
-        print(f"       → Extract to ecommerce/product_images/")
-    elif ecom_count < 12000:
-        print(f"    ⚠️  {ecom_count:,} images (expected ~12,114)")
-        print(f"       → You might have a partial download")
+    elif health_exists and not ecom_exists:
+        print("\n  📊 Project: HEALTHCARE (MedInsight)")
+        health_images = list(health_path.glob('*.png')) if health_path.exists() else []
+        health_count = len(health_images)
+        
+        if health_count == 0:
+            print(f"    ❌ No retinal images found!")
+            print(f"       → Download retinal_images.zip from Slack #capstone-data")
+            print(f"       → Extract to healthcare/retinal_scan_images/")
+            return False
+        elif health_count < 3200:
+            print(f"    ⚠️  {health_count:,} images (expected ~3,222)")
+            print(f"       → You might have a partial download")
+            return False
+        else:
+            print(f"    ✅ {health_count:,} retinal images ready!")
+            return True
+    
+    elif ecom_exists and health_exists:
+        print("\n  ⚠️  BOTH projects detected!")
+        print("     You should focus on ONE project only.")
+        print("     E-commerce teams: rm -rf healthcare/")
+        print("     Healthcare teams: rm -rf ecommerce/")
+        return False
+    
     else:
-        print(f"    ✅ {ecom_count:,} product images ready!")
-    
-    print(f"\n  HEALTHCARE IMAGES:")
-    if health_count == 0:
-        print(f"    ❌ No images found!")
-        print(f"       → Download retinal_images.zip from Slack #capstone-data")
-        print(f"       → Extract to healthcare/retinal_scan_images/")
-    elif health_count < 3200:
-        print(f"    ⚠️  {health_count:,} images (expected ~3,222)")
-        print(f"       → You might have a partial download")
-    else:
-        print(f"    ✅ {health_count:,} retinal images ready!")
-    
-    return ecom_count > 12000 and health_count > 3200
+        print("\n  ❌ No project data found!")
+        print("     Please check your repository setup.")
+        return False
 
 def check_preprocessing_scripts():
     """Verify preprocessing hint files exist."""
